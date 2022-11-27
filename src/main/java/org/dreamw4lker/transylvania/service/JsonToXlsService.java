@@ -1,10 +1,10 @@
 package org.dreamw4lker.transylvania.service;
 
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -12,7 +12,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -79,8 +81,9 @@ public class JsonToXlsService {
     }
 
     private void map2xls() throws IOException {
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Перевод " + langFrom + " --> " + langTo);
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet("Перевод " + langFrom + " -> " + langTo);
+        sheet.protectSheet("1234"); //TODO: use strict pass. Use properties?
 
         Row header = sheet.createRow(0);
 
@@ -95,19 +98,31 @@ public class JsonToXlsService {
 
         headerCell = header.createCell(3);
         headerCell.setCellValue(langTo + " перевод");
+
+        CellStyle unlockedCellStyle = workbook.createCellStyle();
+        unlockedCellStyle.setLocked(false);
+
         int i = 1;
         for (Map.Entry<String, List<String>> entry : jsonKVMap.entrySet()) {
             Row row = sheet.createRow(i);
             row.createCell(0).setCellValue(entry.getKey());
             row.createCell(1).setCellValue(entry.getValue().get(0));
             row.createCell(2).setCellValue(entry.getValue().get(1));
-            row.createCell(3).setCellValue(entry.getValue().size() > 2 ? entry.getValue().get(2) : "");
+
+            Cell toLangCell = row.createCell(3);
+            toLangCell.setCellValue(entry.getValue().size() > 2 ? entry.getValue().get(2) : "");
+            toLangCell.setCellStyle(unlockedCellStyle);
             i++;
         }
 
+        sheet.autoSizeColumn(0);
+        sheet.autoSizeColumn(1);
+        sheet.autoSizeColumn(2);
+        sheet.setColumnWidth(3, 100 * 256); //The unit is 1/256 of character -> the value is 100 chars
+
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temp.xlsx";
+        String fileLocation = path.substring(0, path.length() - 1) + "temp.xls";
 
         FileOutputStream outputStream = new FileOutputStream(fileLocation);
         workbook.write(outputStream);
