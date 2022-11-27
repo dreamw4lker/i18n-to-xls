@@ -13,9 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class JsonToXlsService {
@@ -32,12 +30,13 @@ public class JsonToXlsService {
     }
 
     public void createXls() throws IOException {
-        json2xls();
+        json2xls(langFrom);
+        json2xls(langTo);
         map2xls();
     }
 
-    private void json2xls() throws IOException {
-        Path dir = Paths.get(workPath + File.separator + langFrom);
+    private void json2xls(String lang) throws IOException {
+        Path dir = Paths.get(workPath + File.separator + lang);
         try (Stream<Path> paths = Files.walk(dir)) {
             paths.filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().endsWith(".json"))
@@ -47,7 +46,7 @@ public class JsonToXlsService {
                             JSONTokener tokener = new JSONTokener(reader);
                             JSONObject jsonObject = new JSONObject(tokener);
                             String relativePath = path.toString().replace(workPath + File.separator + langFrom, "");
-                            json2KVMap(jsonObject, "", relativePath);
+                            json2KVMap(jsonObject, "", relativePath, lang);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -55,15 +54,26 @@ public class JsonToXlsService {
         }
     }
 
-    private void json2KVMap(JSONObject jsonObj, String prefix, String path) {
+    private void json2KVMap(JSONObject jsonObj, String prefix, String path, String lang) {
         jsonObj.keySet().forEach(keyStr -> {
             Object value = jsonObj.get(keyStr);
             String currentKey = prefix.isEmpty() ? keyStr : prefix + "." + keyStr;
             if (value instanceof JSONObject) {
-                json2KVMap((JSONObject) value, currentKey, path);
+                json2KVMap((JSONObject) value, currentKey, path, lang);
             } else {
-                //TODO: можно вставить проверку на наличие такого ключа (для warning'ов о дубликатах строк)
-                jsonKVMap.put(currentKey, List.of(path, String.valueOf(value)));
+                if (Objects.equals(lang, langFrom)) {
+                    //TODO: можно вставить проверку на наличие такого ключа (для warning'ов о дубликатах строк)
+                    jsonKVMap.put(currentKey, new ArrayList<>(List.of(path, String.valueOf(value))));
+                } else {
+                    //TODO: there should be better way to update
+                    List<String> values = jsonKVMap.getOrDefault(currentKey, new ArrayList<>());
+                    if (values.isEmpty()) {
+                        values = Arrays.asList(path, "", String.valueOf(value));
+                    } else {
+                        values.add(String.valueOf(value));
+                    }
+                    jsonKVMap.put(currentKey, values);
+                }
             }
         });
     }
@@ -91,6 +101,7 @@ public class JsonToXlsService {
             row.createCell(0).setCellValue(entry.getKey());
             row.createCell(1).setCellValue(entry.getValue().get(0));
             row.createCell(2).setCellValue(entry.getValue().get(1));
+            row.createCell(3).setCellValue(entry.getValue().size() > 2 ? entry.getValue().get(2) : "");
             i++;
         }
 
