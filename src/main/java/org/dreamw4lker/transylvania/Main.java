@@ -31,7 +31,7 @@ public class Main {
         if (workMode == Mode.JSON_TO_XLS) {
             new JsonToXlsService(workPath, langFrom, langTo).createXls();
         } else if (workMode == Mode.XLS_TO_JSON) {
-            new XlsToJsonService(workPath, xls, langFrom, langTo).createJsonFiles();
+            new XlsToJsonService(workPath, xls, langTo).createJsonFiles();
         }
     }
 }

@@ -14,15 +14,13 @@ import java.util.*;
 public class XlsToJsonService {
     private final String workPath;
     private final String xlsPath;
-    private final String langFrom;
     private final String langTo;
 
     private final Map<String, Map<String, String>> filepathMap = new HashMap<>();
 
-    public XlsToJsonService(String workPath, String xlsPath, String langFrom, String langTo) {
+    public XlsToJsonService(String workPath, String xlsPath, String langTo) {
         this.workPath = workPath;
         this.xlsPath = xlsPath;
-        this.langFrom = langFrom;
         this.langTo = langTo;
     }
 
