@@ -107,7 +107,7 @@ public class JsonToXlsService {
 
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temp.xls";
+        String fileLocation = path.substring(0, path.length() - 1) + "temp.xlsx";
 
         FileOutputStream outputStream = new FileOutputStream(fileLocation);
         workbook.write(outputStream);

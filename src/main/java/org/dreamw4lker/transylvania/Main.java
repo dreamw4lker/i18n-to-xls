@@ -2,6 +2,7 @@ package org.dreamw4lker.transylvania;
 
 import org.dreamw4lker.transylvania.domain.Mode;
 import org.dreamw4lker.transylvania.service.JsonToXlsService;
+import org.dreamw4lker.transylvania.service.XlsToJsonService;
 
 import java.io.IOException;
 
@@ -12,6 +13,7 @@ public class Main {
         String workPath = null;
         String langFrom = null;
         String langTo = null;
+        String xls = null;
         for (String arg : args) {
             if (arg.startsWith("mode=")) {
                 workMode = Mode.fromString(arg.split("mode=")[1]);
@@ -21,11 +23,15 @@ public class Main {
                 langFrom = arg.split("from=")[1];
             } else if (arg.startsWith("to=")) {
                 langTo = arg.split("to=")[1];
+            } else if (arg.startsWith("xls=")) {
+                xls = arg.split("xls=")[1];
             }
         }
 
         if (workMode == Mode.JSON_TO_XLS) {
             new JsonToXlsService(workPath, langFrom, langTo).createXls();
+        } else if (workMode == Mode.XLS_TO_JSON) {
+            new XlsToJsonService(workPath, xls, langFrom, langTo).createJsonFiles();
         }
     }
 }
