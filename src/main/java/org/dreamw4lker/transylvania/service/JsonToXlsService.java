@@ -3,6 +3,7 @@ package org.dreamw4lker.transylvania.service;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.BufferedReader;
@@ -15,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
+@Slf4j
 public class JsonToXlsService {
     private final String workPath;
     private final String langFrom;
@@ -60,7 +62,9 @@ public class JsonToXlsService {
                 json2KVMap((JsonObject) value, currentKey, path, lang);
             } else {
                 if (Objects.equals(lang, langFrom)) {
-                    //TODO: можно вставить проверку на наличие такого ключа (для warning'ов о дубликатах строк)
+                    if (jsonKVMap.containsKey(currentKey)) {
+                        log.warn("Found duplicate key: \"{}\" at path \"{}\"", currentKey, path);
+                    }
                     jsonKVMap.put(currentKey, new ArrayList<>(List.of(path, value.getAsString())));
                 } else {
                     //TODO: there should be better way to update

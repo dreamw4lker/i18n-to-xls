@@ -1,14 +1,17 @@
 package org.dreamw4lker.transylvania;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dreamw4lker.transylvania.domain.Mode;
 import org.dreamw4lker.transylvania.service.JsonToXlsService;
 import org.dreamw4lker.transylvania.service.XlsToJsonService;
 
 import java.io.IOException;
 
+@Slf4j
 public class Main {
 
     public static void main(String[] args) throws IOException {
+        log.info("Process started with args: {}", String.join(", ", args));
         Mode workMode = null;
         String workPath = null;
         String langFrom = null;
@@ -33,5 +36,6 @@ public class Main {
         } else if (workMode == Mode.XLS_TO_JSON) {
             new XlsToJsonService(workPath, xls, langTo).createJsonFiles();
         }
+        log.info("Process finished");
     }
 }
