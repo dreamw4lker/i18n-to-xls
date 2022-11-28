@@ -1,8 +1,9 @@
 package org.dreamw4lker.transylvania.service;
 
-import org.apache.poi.hssf.usermodel.*;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,10 +42,9 @@ public class JsonToXlsService {
                     .forEach(path -> {
                         try {
                             BufferedReader reader = Files.newBufferedReader(path);
-                            JSONTokener tokener = new JSONTokener(reader);
-                            JSONObject jsonObject = new JSONObject(tokener);
+                            JsonElement jsonElement = JsonParser.parseReader(reader);
                             String relativePath = path.toString().replace(workPath + File.separator + langFrom, "");
-                            json2KVMap(jsonObject, "", relativePath, lang);
+                            json2KVMap(jsonElement.getAsJsonObject(), "", relativePath, lang);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -52,23 +52,23 @@ public class JsonToXlsService {
         }
     }
 
-    private void json2KVMap(JSONObject jsonObj, String prefix, String path, String lang) {
+    private void json2KVMap(JsonObject jsonObj, String prefix, String path, String lang) {
         jsonObj.keySet().forEach(keyStr -> {
-            Object value = jsonObj.get(keyStr);
+            JsonElement value = jsonObj.get(keyStr);
             String currentKey = prefix.isEmpty() ? keyStr : prefix + "." + keyStr;
-            if (value instanceof JSONObject) {
-                json2KVMap((JSONObject) value, currentKey, path, lang);
+            if (value instanceof JsonObject) {
+                json2KVMap((JsonObject) value, currentKey, path, lang);
             } else {
                 if (Objects.equals(lang, langFrom)) {
                     //TODO: можно вставить проверку на наличие такого ключа (для warning'ов о дубликатах строк)
-                    jsonKVMap.put(currentKey, new ArrayList<>(List.of(path, String.valueOf(value))));
+                    jsonKVMap.put(currentKey, new ArrayList<>(List.of(path, value.getAsString())));
                 } else {
                     //TODO: there should be better way to update
                     List<String> values = jsonKVMap.getOrDefault(currentKey, new ArrayList<>());
                     if (values.isEmpty()) {
-                        values = Arrays.asList(path, "", String.valueOf(value));
+                        values = Arrays.asList(path, "", value.getAsString());
                     } else {
-                        values.add(String.valueOf(value));
+                        values.add(value.getAsString());
                     }
                     jsonKVMap.put(currentKey, values);
                 }

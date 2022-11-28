@@ -1,15 +1,21 @@
 package org.dreamw4lker.transylvania.service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class XlsToJsonService {
     private final String workPath;
@@ -32,8 +38,8 @@ public class XlsToJsonService {
     private void xls2map() throws IOException {
         File xlsFile = new File(xlsPath);
         try (FileInputStream fileInputStream = new FileInputStream(xlsFile)) {
-            XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
-            Sheet sheet = workbook.getSheetAt(0);
+            HSSFWorkbook workbook = new HSSFWorkbook(fileInputStream);
+            HSSFSheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
 
             //Первая строка с заголовками - она не нужна
@@ -55,25 +61,25 @@ public class XlsToJsonService {
 
     private void map2json() throws IOException {
         for (Map.Entry<String, Map<String, String>> entry : filepathMap.entrySet()) {
-            JSONObject jsonObject = createJsonObject(entry.getValue());
+            JsonObject jsonObject = createJsonObject(entry.getValue());
             saveJsonObject(entry.getKey(), jsonObject);
         }
     }
 
-    private JSONObject createJsonObject(Map<String, String> values) {
-        JSONObject jsonObject = new JSONObject();
+    private JsonObject createJsonObject(Map<String, String> values) {
+        JsonObject jsonObject = new JsonObject();
         for (Map.Entry<String, String> entry : values.entrySet()) {
             String[] jsonPath = entry.getKey().split("\\.");
-            JSONObject pointer = jsonObject;
+            JsonObject pointer = jsonObject;
             for (int i = 0; i < jsonPath.length; i++) {
                 if (pointer.has(jsonPath[i])) {
-                    pointer = pointer.getJSONObject(jsonPath[i]);
+                    pointer = pointer.getAsJsonObject(jsonPath[i]);
                 } else {
                     if (i != jsonPath.length - 1) {
-                        pointer.put(jsonPath[i], new JSONObject());
-                        pointer = pointer.getJSONObject(jsonPath[i]);
+                        pointer.add(jsonPath[i], new JsonObject());
+                        pointer = pointer.getAsJsonObject(jsonPath[i]);
                     } else {
-                        pointer.put(jsonPath[i], entry.getValue());
+                        pointer.addProperty(jsonPath[i], entry.getValue());
                     }
                 }
             }
@@ -81,8 +87,9 @@ public class XlsToJsonService {
         return jsonObject;
     }
 
-    private void saveJsonObject(String path, JSONObject jsonObject) throws IOException {
+    private void saveJsonObject(String path, JsonObject jsonObject) throws IOException {
         File file = new File(workPath + File.separator + langTo + File.separator + path);
-        FileUtils.write(file, jsonObject.toString(4), StandardCharsets.UTF_8);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        FileUtils.write(file, gson.toJson(jsonObject), StandardCharsets.UTF_8);
     }
 }
