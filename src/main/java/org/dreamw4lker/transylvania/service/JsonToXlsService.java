@@ -1,10 +1,6 @@
 package org.dreamw4lker.transylvania.service;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.hssf.usermodel.*;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -81,51 +77,13 @@ public class JsonToXlsService {
     }
 
     private void map2xls() throws IOException {
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet("Перевод " + langFrom + " -> " + langTo);
-        sheet.protectSheet("1234"); //TODO: use strict pass. Use properties?
-
-        Row header = sheet.createRow(0);
-
-        Cell headerCell = header.createCell(0);
-        headerCell.setCellValue("ID строки");
-
-        headerCell = header.createCell(1);
-        headerCell.setCellValue("Путь до файла");
-
-        headerCell = header.createCell(2);
-        headerCell.setCellValue(langFrom + " перевод");
-
-        headerCell = header.createCell(3);
-        headerCell.setCellValue(langTo + " перевод");
-
-        CellStyle unlockedCellStyle = workbook.createCellStyle();
-        unlockedCellStyle.setLocked(false);
-
-        int i = 1;
-        for (Map.Entry<String, List<String>> entry : jsonKVMap.entrySet()) {
-            Row row = sheet.createRow(i);
-            row.createCell(0).setCellValue(entry.getKey());
-            row.createCell(1).setCellValue(entry.getValue().get(0));
-            row.createCell(2).setCellValue(entry.getValue().get(1));
-
-            Cell toLangCell = row.createCell(3);
-            toLangCell.setCellValue(entry.getValue().size() > 2 ? entry.getValue().get(2) : "");
-            toLangCell.setCellStyle(unlockedCellStyle);
-            i++;
-        }
-
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
-        sheet.autoSizeColumn(2);
-        sheet.setColumnWidth(3, 100 * 256); //The unit is 1/256 of character -> the value is 100 chars
-
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temp.xls";
+        String fileLocation = path.substring(0, path.length() - 1) + "translation_template.xls";
 
-        FileOutputStream outputStream = new FileOutputStream(fileLocation);
-        workbook.write(outputStream);
-        workbook.close();
+        try (HSSFWorkbook workbook = new XlsMakeService(langFrom, langTo, jsonKVMap).createWorkbook();
+             FileOutputStream outputStream = new FileOutputStream(fileLocation)) {
+            workbook.write(outputStream);
+        }
     }
 }
