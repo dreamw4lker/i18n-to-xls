@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,9 @@ public class XlsMakeService {
         this.jsonKVMap = jsonKVMap;
     }
 
+    /**
+     * Creates style for bold (e.g. header) cells
+     */
     private HSSFCellStyle createBoldCellStyle(HSSFWorkbook workbook) {
         HSSFCellStyle style = workbook.createCellStyle();
         HSSFFont boldFont = workbook.createFont();
@@ -31,12 +35,18 @@ public class XlsMakeService {
         return style;
     }
 
+    /**
+     * Creates style for unlocked cells
+     */
     private HSSFCellStyle createUnlockedCellStyle(HSSFWorkbook workbook) {
         HSSFCellStyle style = workbook.createCellStyle();
         style.setLocked(false);
         return style;
     }
 
+    /**
+     * Creates headers cells
+     */
     private HSSFCell createHeaderCell(String value, int columnIndex, HSSFRow row, HSSFCellStyle style) {
         HSSFCell headerCell = row.createCell(columnIndex);
         headerCell.setCellValue(value);
@@ -44,17 +54,20 @@ public class XlsMakeService {
         return headerCell;
     }
 
+    /**
+     * Main XLS workbook creation method
+     */
     public HSSFWorkbook createWorkbook() {
         HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet("Перевод " + this.langFrom + " -> " + this.langTo);
-        sheet.protectSheet("1234"); //TODO: use strict pass. Use properties?
+        HSSFSheet sheet = workbook.createSheet(MessageFormat.format("Перевод {0} -> {1}", this.langFrom, this.langTo));
+        sheet.protectSheet("12345678");
 
         HSSFRow header = sheet.createRow(0);
         HSSFCellStyle boldCellStyle = createBoldCellStyle(workbook);
         createHeaderCell("ID строки", 0, header, boldCellStyle);
         createHeaderCell("Путь до файла", 1, header, boldCellStyle);
-        createHeaderCell(this.langFrom + " перевод", 2, header, boldCellStyle);
-        createHeaderCell(this.langTo + " перевод", 3, header, boldCellStyle);
+        createHeaderCell(MessageFormat.format("{0} перевод", this.langFrom), 2, header, boldCellStyle);
+        createHeaderCell(MessageFormat.format("{0} перевод", this.langTo), 3, header, boldCellStyle);
 
         CellStyle unlockedCellStyle = createUnlockedCellStyle(workbook);
 

@@ -1,5 +1,8 @@
 <configuration scan="true" scanPeriod="30 seconds">
 
+    <!-- Suppress default warnings from Apache POI Document -->
+    <logger name="org.apache.poi.POIDocument" level="OFF"/>
+
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{ISO8601} %magenta([%thread]) %highlight([%-5level]) %cyan(%logger{15}) - %msg %n</pattern>
