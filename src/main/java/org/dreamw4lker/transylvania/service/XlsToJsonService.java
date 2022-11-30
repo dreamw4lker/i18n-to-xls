@@ -24,10 +24,10 @@ public class XlsToJsonService {
 
     private final Map<String, Map<String, String>> filepathMap = new HashMap<>();
 
-    public XlsToJsonService(String workPath, String xlsPath, String langTo) {
-        this.workPath = workPath;
-        this.xlsPath = xlsPath;
-        this.langTo = langTo;
+    public XlsToJsonService(Map<String, String> args) {
+        this.workPath = args.get("path");
+        this.xlsPath = args.get("xls");
+        this.langTo = args.get("to");
     }
 
     public void createJsonFiles() throws IOException {

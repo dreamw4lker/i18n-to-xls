@@ -1,10 +1,13 @@
 package org.dreamw4lker.transylvania.domain;
 
+import lombok.Getter;
+
 public enum Mode {
     JSON_TO_XLS("json2xls"),
     XLS_TO_JSON("xls2json");
 
-    private String text;
+    @Getter
+    private final String text;
 
     Mode(String text) {
         this.text = text;

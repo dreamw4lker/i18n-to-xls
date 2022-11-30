@@ -24,10 +24,10 @@ public class JsonToXlsService {
 
     private final Map<String, List<String>> jsonKVMap = new TreeMap<>();
 
-    public JsonToXlsService(String workPath, String langFrom, String langTo) {
-        this.workPath = workPath;
-        this.langFrom = langFrom;
-        this.langTo = langTo;
+    public JsonToXlsService(Map<String, String> args) {
+        this.workPath = args.get("path");
+        this.langFrom = args.get("from");
+        this.langTo = args.get("to");
     }
 
     public void createXls() throws IOException {
