@@ -26,6 +26,8 @@ public class JsonToXlsService {
     private final String workPath;
     private final String langFrom;
     private final String langTo;
+    private final String resultFileName;
+    private final String password;
 
     private final Map<String, String[]> jsonKVMap = new TreeMap<>();
 
@@ -33,6 +35,8 @@ public class JsonToXlsService {
         this.workPath = args.get("path");
         this.langFrom = args.get("from");
         this.langTo = args.get("to");
+        this.resultFileName = args.get("resultFileName");
+        this.password = args.get("password");
     }
 
     /**
@@ -114,9 +118,9 @@ public class JsonToXlsService {
     private void mapToXls() {
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "translation_template.xls";
+        String fileLocation = path.substring(0, path.length() - 1) + resultFileName;
 
-        try (HSSFWorkbook workbook = new XlsMakeService(langFrom, langTo, jsonKVMap).createWorkbook();
+        try (HSSFWorkbook workbook = new XlsMakeService(langFrom, langTo, password, jsonKVMap).createWorkbook();
              FileOutputStream outputStream = new FileOutputStream(fileLocation)) {
             workbook.write(outputStream);
             log.info("XLS file successfully created at path: {}", fileLocation);

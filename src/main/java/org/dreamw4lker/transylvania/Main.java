@@ -20,6 +20,9 @@ public class Main {
 
     private static Mode workMode;
 
+    private static final String FALLBACK_PASSWORD = "12345678";
+    private static final String FALLBACK_XLS_FILE_NAME = "translation_template.xls";
+
     /**
      * Чтение аргументов из строки запуска
      * @param args аргументы
@@ -29,6 +32,14 @@ public class Main {
         for (String arg : args) {
             String[] keyValue = arg.split("=");
             arguments.put(keyValue[0], keyValue[1]);
+        }
+        if (!arguments.containsKey("password")) {
+            log.warn("Argument 'password' was not found. Process will use fallback value");
+            arguments.put("password", FALLBACK_PASSWORD);
+        }
+        if (!arguments.containsKey("resultFileName")) {
+            log.warn("Argument 'resultFileName' was not found. Process will use fallback value '{}'", FALLBACK_XLS_FILE_NAME);
+            arguments.put("resultFileName", FALLBACK_XLS_FILE_NAME);
         }
         return arguments;
     }

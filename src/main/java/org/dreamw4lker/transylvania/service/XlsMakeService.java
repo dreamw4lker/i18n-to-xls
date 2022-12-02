@@ -18,6 +18,7 @@ public class XlsMakeService {
 
     private final String langFrom;
     private final String langTo;
+    private final String password;
 
     /**
      * Значения этой Map - массив из 3 элементов:
@@ -25,10 +26,11 @@ public class XlsMakeService {
      */
     private final Map<String, String[]> jsonKVMap;
 
-    public XlsMakeService(String langFrom, String langTo, Map<String, String[]> jsonKVMap) {
+    public XlsMakeService(String langFrom, String langTo, String password, Map<String, String[]> jsonKVMap) {
         this.langFrom = langFrom;
         this.langTo = langTo;
         this.jsonKVMap = jsonKVMap;
+        this.password = password;
     }
 
     /**
@@ -69,7 +71,7 @@ public class XlsMakeService {
     public HSSFWorkbook createWorkbook() {
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet(MessageFormat.format("Перевод {0} -> {1}", this.langFrom, this.langTo));
-        sheet.protectSheet("12345678");
+        sheet.protectSheet(password);
 
         HSSFRow header = sheet.createRow(0);
         HSSFCellStyle boldCellStyle = createBoldCellStyle(workbook);
