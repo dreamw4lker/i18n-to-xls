@@ -17,7 +17,8 @@ public class Main {
     private static Mode workMode;
 
     /**
-     * Reads arguments from command prompt
+     * Чтение аргументов из строки запуска
+     * @param args аргументы
      */
     private static Map<String, String> readArgs(String[] args) {
         Map<String, String> arguments = new HashMap<>();
@@ -29,7 +30,8 @@ public class Main {
     }
 
     /**
-     * Checks required arguments for specific mode
+     * Проверка наличия необходимых аргументов для режима запуска
+     * @param args key-value map аргументов
      */
     private static boolean checkArgs(Map<String, String> args) {
         workMode = Mode.fromString(args.get("mode"));

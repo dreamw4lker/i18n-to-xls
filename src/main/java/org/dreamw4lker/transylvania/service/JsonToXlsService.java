@@ -22,7 +22,7 @@ public class JsonToXlsService {
     private final String langFrom;
     private final String langTo;
 
-    private final Map<String, List<String>> jsonKVMap = new TreeMap<>();
+    private final Map<String, String[]> jsonKVMap = new TreeMap<>();
 
     public JsonToXlsService(Map<String, String> args) {
         this.workPath = args.get("path");
@@ -30,57 +30,83 @@ public class JsonToXlsService {
         this.langTo = args.get("to");
     }
 
-    public void createXls() throws IOException {
-        json2xls(langFrom);
-        json2xls(langTo);
-        map2xls();
+    /**
+     * Основная функция преобразования JSON-файлов в XLS
+     */
+    public void createXls() {
+        fillKVMap(langFrom);
+        fillKVMap(langTo);
+        mapToXls();
     }
 
-    private void json2xls(String lang) throws IOException {
-        Path dir = Paths.get(workPath + File.separator + lang);
+    /**
+     * Преобразование JSON-файлов в key-value map
+     * @param lang язык перевода (используется в качестве префикса папки переводов)
+     */
+    private void fillKVMap(String lang) {
+        String absolutePath = workPath + File.separator + lang;
+        Path dir = Paths.get(absolutePath);
         try (Stream<Path> paths = Files.walk(dir)) {
             paths.filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".json"))
-                    .forEach(path -> {
+                    .filter(filepath -> filepath.getFileName().toString().endsWith(".json"))
+                    .forEach(filepath -> {
                         try {
-                            BufferedReader reader = Files.newBufferedReader(path);
+                            BufferedReader reader = Files.newBufferedReader(filepath);
                             JsonElement jsonElement = JsonParser.parseReader(reader);
-                            String relativePath = path.toString().replace(workPath + File.separator + langFrom, "");
-                            json2KVMap(jsonElement.getAsJsonObject(), "", relativePath, lang);
+                            String relativePath = filepath.toString().replace(absolutePath, "");
+                            jsonToKVMap(jsonElement.getAsJsonObject(), "", relativePath, lang);
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            log.error("JSON file processing error. Filepath: '{}'", filepath, e);
                         }
                     });
+        } catch (IOException e) {
+            log.error("I/O exception at Files.walk command execution. Directory: '{}'", dir, e);
         }
     }
 
-    private void json2KVMap(JsonObject jsonObj, String prefix, String path, String lang) {
+    /**
+     * Перенос данных одного JSON-файла в key-value map.
+     * (!) Это рекурсивная функция. Есть потенциальная возможность получить StackOverflowError на больших вложенностях
+     *
+     * @param jsonObj JSON-объект, прочитанный из JSON-файла
+     * @param prefix текущий префикс. Для перевода "aa.bb.cc.dd" на каждом уровне рекурсии он будет равен "aa", "aa.bb", "aa.bb.cc"
+     * @param path относительный путь до файла перевода
+     * @param lang текущий язык перевода
+     */
+    private void jsonToKVMap(JsonObject jsonObj, String prefix, String path, String lang) {
         jsonObj.keySet().forEach(keyStr -> {
             JsonElement value = jsonObj.get(keyStr);
             String currentKey = prefix.isEmpty() ? keyStr : prefix + "." + keyStr;
             if (value instanceof JsonObject) {
-                json2KVMap((JsonObject) value, currentKey, path, lang);
+                jsonToKVMap((JsonObject) value, currentKey, path, lang);
             } else {
+                String[] mapValue = new String[] {"", "", ""};
                 if (Objects.equals(lang, langFrom)) {
+                    //В этом случае мы работаем со строками на исходном языке
                     if (jsonKVMap.containsKey(currentKey)) {
-                        log.warn("Found duplicate key: \"{}\" at path \"{}\"", currentKey, path);
+                        log.warn("Found duplicate key: '{}' at path '{}'", currentKey, path);
                     }
-                    jsonKVMap.put(currentKey, new ArrayList<>(List.of(path, value.getAsString())));
+                    mapValue[0] = path;
+                    mapValue[1] = value.getAsString();
                 } else {
-                    //TODO: there should be better way to update
-                    List<String> values = jsonKVMap.getOrDefault(currentKey, new ArrayList<>());
-                    if (values.isEmpty()) {
-                        values = Arrays.asList(path, "", value.getAsString());
+                    //В этом случае мы работаем со строками на языке-результате
+                    mapValue = jsonKVMap.get(currentKey);
+                    if (mapValue == null) {
+                        mapValue = new String[] {path, "", value.getAsString()};
                     } else {
-                        values.add(value.getAsString());
+                        //В Map могут присутствовать записи с переводом на исходном языке. Просто дополняем их
+                        mapValue[2] = value.getAsString();
                     }
-                    jsonKVMap.put(currentKey, values);
                 }
+                jsonKVMap.put(currentKey, mapValue);
             }
         });
     }
 
-    private void map2xls() throws IOException {
+    /**
+     * Преобразование key-value map в XLS-файл
+     */
+    private void mapToXls() {
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
         String fileLocation = path.substring(0, path.length() - 1) + "translation_template.xls";
@@ -88,6 +114,9 @@ public class JsonToXlsService {
         try (HSSFWorkbook workbook = new XlsMakeService(langFrom, langTo, jsonKVMap).createWorkbook();
              FileOutputStream outputStream = new FileOutputStream(fileLocation)) {
             workbook.write(outputStream);
+            log.info("XLS file successfully created at path: '{}'", fileLocation);
+        } catch (IOException e) {
+            log.error("I/O exception at XLS to OutputSteam write", e);
         }
     }
 }

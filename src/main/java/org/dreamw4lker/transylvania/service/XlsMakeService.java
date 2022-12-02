@@ -7,23 +7,27 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Map;
 
 public class XlsMakeService {
 
     private final String langFrom;
     private final String langTo;
-    private final Map<String, List<String>> jsonKVMap;
 
-    public XlsMakeService(String langFrom, String langTo, Map<String, List<String>> jsonKVMap) {
+    /**
+     * Значения этой Map - массив из 3 элементов:
+     * ["путь до файла", "перевод на исходном языке", "перевод на языке-результате"]
+     */
+    private final Map<String, String[]> jsonKVMap;
+
+    public XlsMakeService(String langFrom, String langTo, Map<String, String[]> jsonKVMap) {
         this.langFrom = langFrom;
         this.langTo = langTo;
         this.jsonKVMap = jsonKVMap;
     }
 
     /**
-     * Creates style for bold (e.g. header) cells
+     * Создание стиля для ячеек с жирным шрифтом (например, для заголовков колонок таблиц)
      */
     private HSSFCellStyle createBoldCellStyle(HSSFWorkbook workbook) {
         HSSFCellStyle style = workbook.createCellStyle();
@@ -36,7 +40,7 @@ public class XlsMakeService {
     }
 
     /**
-     * Creates style for unlocked cells
+     * Создание стиля для "разблокированных" ячеек
      */
     private HSSFCellStyle createUnlockedCellStyle(HSSFWorkbook workbook) {
         HSSFCellStyle style = workbook.createCellStyle();
@@ -45,7 +49,7 @@ public class XlsMakeService {
     }
 
     /**
-     * Creates headers cells
+     * Создание ячеек-заголовков
      */
     private HSSFCell createHeaderCell(String value, int columnIndex, HSSFRow row, HSSFCellStyle style) {
         HSSFCell headerCell = row.createCell(columnIndex);
@@ -55,7 +59,7 @@ public class XlsMakeService {
     }
 
     /**
-     * Main XLS workbook creation method
+     * Основной метод создания XLS-файла
      */
     public HSSFWorkbook createWorkbook() {
         HSSFWorkbook workbook = new HSSFWorkbook();
@@ -72,22 +76,24 @@ public class XlsMakeService {
         CellStyle unlockedCellStyle = createUnlockedCellStyle(workbook);
 
         int i = 1;
-        for (Map.Entry<String, List<String>> entry : this.jsonKVMap.entrySet()) {
+        for (Map.Entry<String, String[]> entry : this.jsonKVMap.entrySet()) {
             HSSFRow row = sheet.createRow(i);
             row.createCell(0).setCellValue(entry.getKey());
-            row.createCell(1).setCellValue(entry.getValue().get(0));
-            row.createCell(2).setCellValue(entry.getValue().get(1));
+            row.createCell(1).setCellValue(entry.getValue()[0]);
+            row.createCell(2).setCellValue(entry.getValue()[1]);
 
             Cell toLangCell = row.createCell(3);
-            toLangCell.setCellValue(entry.getValue().size() > 2 ? entry.getValue().get(2) : ""); //TODO: beautify logic
+            toLangCell.setCellValue(entry.getValue()[2]);
             toLangCell.setCellStyle(unlockedCellStyle);
             i++;
         }
 
         sheet.autoSizeColumn(0);
-        sheet.setColumnWidth(1, 0); //Hides filepath column
+        sheet.setColumnWidth(1, 0); //Колонка "Путь до файла" будет скрыта (шириной в 0 точек)
         sheet.autoSizeColumn(2);
-        sheet.setColumnWidth(3, 100 * 256); //The unit is 1/256 of character -> the value is 100 chars
+        //3й столбец часто будет пустой, поэтому autosize делать не следует, всегда ставим ширину в 100 символов.
+        //Здесь ширина вычисляется как 1/256 от символа
+        sheet.setColumnWidth(3, 100 * 256);
 
         return workbook;
     }
