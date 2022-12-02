@@ -5,12 +5,16 @@ import org.dreamw4lker.transylvania.domain.Mode;
 import org.dreamw4lker.transylvania.service.JsonToXlsService;
 import org.dreamw4lker.transylvania.service.XlsToJsonService;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Основной класс утилиты переноса переводов JSON -> XLS и XLS -> JSON
+ *
+ * @author Alexander Shkirkov
+ */
 @Slf4j
 public class Main {
 
@@ -57,7 +61,7 @@ public class Main {
         });
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         log.info("Process started with args: {}", String.join(", ", args));
 
         Map<String, String> arguments = readArgs(args);

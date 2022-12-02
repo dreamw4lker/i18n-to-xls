@@ -16,6 +16,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * Сервис переноса JSON-файлов переводов в XLS
+ *
+ * @author Alexander Shkirkov
+ */
 @Slf4j
 public class JsonToXlsService {
     private final String workPath;
@@ -56,11 +61,11 @@ public class JsonToXlsService {
                             String relativePath = filepath.toString().replace(absolutePath, "");
                             jsonToKVMap(jsonElement.getAsJsonObject(), "", relativePath, lang);
                         } catch (IOException e) {
-                            log.error("JSON file processing error. Filepath: '{}'", filepath, e);
+                            log.error("JSON file processing error. Filepath: {}", filepath, e);
                         }
                     });
         } catch (IOException e) {
-            log.error("I/O exception at Files.walk command execution. Directory: '{}'", dir, e);
+            log.error("I/O exception at Files.walk command execution. Directory: {}", dir, e);
         }
     }
 
@@ -84,7 +89,7 @@ public class JsonToXlsService {
                 if (Objects.equals(lang, langFrom)) {
                     //В этом случае мы работаем со строками на исходном языке
                     if (jsonKVMap.containsKey(currentKey)) {
-                        log.warn("Found duplicate key: '{}' at path '{}'", currentKey, path);
+                        log.warn("Found duplicate key: '{}' at path {}", currentKey, path);
                     }
                     mapValue[0] = path;
                     mapValue[1] = value.getAsString();
@@ -114,7 +119,7 @@ public class JsonToXlsService {
         try (HSSFWorkbook workbook = new XlsMakeService(langFrom, langTo, jsonKVMap).createWorkbook();
              FileOutputStream outputStream = new FileOutputStream(fileLocation)) {
             workbook.write(outputStream);
-            log.info("XLS file successfully created at path: '{}'", fileLocation);
+            log.info("XLS file successfully created at path: {}", fileLocation);
         } catch (IOException e) {
             log.error("I/O exception at XLS to OutputSteam write", e);
         }

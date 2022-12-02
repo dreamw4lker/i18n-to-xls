@@ -2,6 +2,11 @@ package org.dreamw4lker.transylvania.domain;
 
 import lombok.Getter;
 
+/**
+ * Enum с режимами запуска приложения
+ *
+ * @author Alexander Shkirkov
+ */
 public enum Mode {
     JSON_TO_XLS("json2xls"),
     XLS_TO_JSON("xls2json");

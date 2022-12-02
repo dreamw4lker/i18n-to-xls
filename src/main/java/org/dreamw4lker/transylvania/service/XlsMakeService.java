@@ -9,6 +9,11 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import java.text.MessageFormat;
 import java.util.Map;
 
+/**
+ * Сервис подготовки XLS-файла переводов
+ *
+ * @author Alexander Shkirkov
+ */
 public class XlsMakeService {
 
     private final String langFrom;
