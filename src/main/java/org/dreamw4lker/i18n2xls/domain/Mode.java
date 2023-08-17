@@ -1,4 +1,4 @@
-package org.dreamw4lker.transylvania.domain;
+package org.dreamw4lker.i18n2xls.domain;
 
 import lombok.Getter;
 

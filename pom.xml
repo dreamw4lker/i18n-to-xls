@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.dreamw4lker</groupId>
-    <artifactId>transylvania</artifactId>
+    <artifactId>i18n2xls</artifactId>
     <version>1.0.0</version>
 
     <properties>
@@ -71,7 +71,7 @@
     </dependencies>
 
     <build>
-        <finalName>transylvania-${project.version}</finalName>
+        <finalName>i18n-to-xls-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -93,7 +93,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.dreamw4lker.transylvania.Main</mainClass>
+                            <mainClass>org.dreamw4lker.i18n2xls.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

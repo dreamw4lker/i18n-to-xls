@@ -1,4 +1,4 @@
-package org.dreamw4lker.transylvania.service;
+package org.dreamw4lker.i18n2xls.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

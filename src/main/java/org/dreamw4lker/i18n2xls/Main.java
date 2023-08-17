@@ -1,9 +1,9 @@
-package org.dreamw4lker.transylvania;
+package org.dreamw4lker.i18n2xls;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dreamw4lker.transylvania.domain.Mode;
-import org.dreamw4lker.transylvania.service.JsonToXlsService;
-import org.dreamw4lker.transylvania.service.XlsToJsonService;
+import org.dreamw4lker.i18n2xls.domain.Mode;
+import org.dreamw4lker.i18n2xls.service.JsonToXlsService;
+import org.dreamw4lker.i18n2xls.service.XlsToJsonService;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -10,7 +10,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/transylvania.log</file>
+        <file>logs/i18n2xls.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
                 %d{ISO8601} [%thread] %-5level %logger{36}.%M - %msg%n
@@ -18,7 +18,7 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>
-                logs/transylvania_%d{yyyy-MM-dd}_%i.log
+                logs/i18n2xls_%d{yyyy-MM-dd}_%i.log
             </fileNamePattern>
             <maxFileSize>20MB</maxFileSize>
             <maxHistory>30</maxHistory>
